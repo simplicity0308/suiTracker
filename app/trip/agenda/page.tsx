@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AddDayForm } from "@/components/agenda/AddDayForm";
 import { DayColumn } from "@/components/agenda/DayColumn";
-import { StopForm } from "@/components/agenda/StopForm";
 import type { Day, Stop } from "@/lib/types";
 
 export default async function AgendaPage() {
@@ -60,17 +59,15 @@ export default async function AgendaPage() {
 
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-          Add a stop
-        </h2>
-        <StopForm tripId={trip.id} days={dayList} />
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
           Add a day
         </h2>
         <AddDayForm tripId={trip.id} nextSortOrder={dayList.length} />
       </section>
+
+      <p className="text-xs text-zinc-500">
+        To add a stop, search for it on the Map tab and assign it to a day
+        there.
+      </p>
 
       <section className="space-y-6">
         {dayList.map((day) => (

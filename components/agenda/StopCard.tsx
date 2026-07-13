@@ -10,7 +10,8 @@ export function StopCard({ stop }: { stop: Stop }) {
       <div>
         <p className="font-medium">{stop.name}</p>
         <p className="text-xs text-zinc-500">
-          {categoryLabel} · {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
+          {categoryLabel}
+          {stop.address ? ` · ${stop.address}` : ""}
         </p>
         {stop.note && (
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">{stop.note}</p>
