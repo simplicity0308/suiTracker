@@ -14,6 +14,6 @@ select new_trip.id, u.id
 from new_trip
 cross join (
   values
-    ('00000000-0000-0000-0000-000000000000'::uuid), -- replace: user 1 id
-    ('00000000-0000-0000-0000-000000000000'::uuid)  -- replace: user 2 id
+    ('4c2e704c-d8f9-44bb-bbb1-537408fdddad'::uuid), -- replace: user 1 id
+    ('fd645ec8-90c0-4e3a-b3a8-d0c618b04a4e'::uuid)  -- replace: user 2 id
 ) as u(id);
