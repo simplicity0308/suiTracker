@@ -21,7 +21,7 @@ import { reorderDays } from "@/lib/actions/days";
 import { reorderStops } from "@/lib/actions/stops";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import { getNextUpcomingItem } from "@/lib/utils";
-import type { Day, Stop, Todo } from "@/lib/types";
+import type { Day, Profile, Stop, Todo } from "@/lib/types";
 import { DayColumn } from "./DayColumn";
 
 const UNSCHEDULED = "container:unscheduled";
@@ -32,10 +32,12 @@ export function AgendaBoard({
   days: propDays,
   stops: propStops,
   todos,
+  profiles = [],
 }: {
   days: Day[];
   stops: Stop[];
   todos: Todo[];
+  profiles?: Profile[];
 }) {
   const [days, setDays] = useState(propDays);
   const [stops, setStops] = useState(propStops);
@@ -70,9 +72,10 @@ export function AgendaBoard({
       .sort((a, b) => a.sort_order - b.sort_order);
   }
 
-  function todosForDay(dayDate: string | null) {
-    if (!dayDate) return [];
-    return todos.filter((t) => t.due_date === dayDate);
+  function todosForDay(day: Day) {
+    return todos.filter((t) =>
+      t.day_id ? t.day_id === day.id : t.due_date === day.day_date && !!day.day_date
+    );
   }
 
   function findContainerOf(id: string): string | null {
@@ -181,16 +184,22 @@ export function AgendaBoard({
               key={day.id}
               day={day}
               stops={stopsByDay(day.id)}
-              todos={todosForDay(day.day_date)}
+              todos={todosForDay(day)}
               nextStopId={nextStopId}
               nextTodoId={nextTodoId}
+              profiles={profiles}
             />
           ))}
         </div>
       </SortableContext>
 
       <div className="mt-6">
-        <DayColumn day={null} stops={stopsByDay(null)} nextStopId={nextStopId} />
+        <DayColumn
+          day={null}
+          stops={stopsByDay(null)}
+          nextStopId={nextStopId}
+          profiles={profiles}
+        />
       </div>
 
       <DragOverlay>

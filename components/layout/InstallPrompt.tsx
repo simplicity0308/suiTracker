@@ -53,7 +53,7 @@ export function InstallPrompt() {
   if (!deferredPrompt && !isIos) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-2 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-3 dark:border-zinc-800 dark:bg-zinc-900">
       {deferredPrompt ? (
         <>
           <span>Install this app for quick access and offline viewing.</span>

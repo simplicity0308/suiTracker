@@ -1,4 +1,12 @@
-import type { Day, Stop, Todo } from "./types";
+import type { Day, Profile, Stop, Todo } from "./types";
+
+export function getCreatorLabel(
+  createdBy: string | null,
+  profiles: Profile[]
+) {
+  if (!createdBy) return null;
+  return profiles.find((p) => p.id === createdBy)?.label ?? null;
+}
 
 export function googleMapsUrl(stop: Pick<Stop, "lat" | "lng" | "place_id">) {
   const params = new URLSearchParams({

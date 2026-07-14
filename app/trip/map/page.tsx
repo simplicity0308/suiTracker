@@ -38,7 +38,7 @@ export default function MapPage() {
     );
   }
 
-  const { trip, days: dayList, stops: stopList } = data;
+  const { trip, days: dayList, stops: stopList, profiles: profileList } = data;
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">
@@ -49,7 +49,7 @@ export default function MapPage() {
         <StopForm tripId={trip.id} days={dayList} />
       </div>
       <div className="order-1 flex-1 md:order-2">
-        <MapView stops={stopList} days={dayList} />
+        <MapView stops={stopList} days={dayList} profiles={profileList} />
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Day, Stop, Todo } from "@/lib/types";
+import type { Day, Profile, Stop, Todo } from "@/lib/types";
 import { renameDay, deleteDay } from "@/lib/actions/days";
 import { deleteTodo, toggleTodo } from "@/lib/actions/todos";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
@@ -55,12 +55,14 @@ export function DayColumn({
   todos = [],
   nextStopId,
   nextTodoId,
+  profiles = [],
 }: {
   day: Day | null;
   stops: Stop[];
   todos?: Todo[];
   nextStopId?: string | null;
   nextTodoId?: string | null;
+  profiles?: Profile[];
 }) {
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(day?.label ?? "");
@@ -153,7 +155,7 @@ export function DayColumn({
           </h2>
         )}
         {day && isToday(day.day_date) && (
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
             Today
           </span>
         )}
@@ -182,6 +184,7 @@ export function DayColumn({
                 key={entry.id}
                 stop={entry.stop}
                 isNextUp={entry.id === nextStopId}
+                profiles={profiles}
               />
             ) : (
               <TodoRow
@@ -193,6 +196,7 @@ export function DayColumn({
                   toggleTodo(entry.todo.id, !entry.todo.done).then(invalidate)
                 }
                 onDelete={() => deleteTodo(entry.todo.id).then(invalidate)}
+                profiles={profiles}
               />
             )
           )}

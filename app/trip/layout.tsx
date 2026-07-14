@@ -17,9 +17,9 @@ export default function TripLayout({
       <MapsProvider>
         <div className="flex min-h-full flex-1 flex-col">
           <InstallPrompt />
-          <header className="flex items-center gap-6 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+          <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3 sm:gap-6 dark:border-zinc-800">
             <span
-              className={`${yujiSyuku.className} text-lg text-[#182349] dark:text-blue-300`}
+              className={`${yujiSyuku.className} hidden text-lg text-[#182349] sm:inline-block dark:text-blue-300`}
             >
               SuiTracker
             </span>

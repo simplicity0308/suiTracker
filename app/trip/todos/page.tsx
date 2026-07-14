@@ -33,6 +33,7 @@ export default function TodosPage() {
         todos={data.todos}
         days={data.days}
         stops={data.stops}
+        profiles={data.profiles}
       />
     </main>
   );

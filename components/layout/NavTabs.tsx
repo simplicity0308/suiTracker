@@ -12,7 +12,7 @@ const TABS = [
 export function NavTabs() {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-5 text-sm font-medium">
+    <nav className="flex gap-4 text-sm font-medium sm:gap-5">
       {TABS.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (

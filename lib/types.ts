@@ -24,12 +24,20 @@ export type Day = {
 export type Todo = {
   id: string;
   trip_id: string;
+  day_id: string | null;
   title: string;
+  note: string | null;
   due_date: string | null;
   due_time: string | null;
   done: boolean;
   sort_order: number;
   created_at: string;
+  created_by: string | null;
+};
+
+export type Profile = {
+  id: string;
+  label: string;
 };
 
 export type Stop = {

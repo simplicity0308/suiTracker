@@ -2,15 +2,23 @@
 
 import { useState } from "react";
 import { Map as GoogleMap, InfoWindow } from "@vis.gl/react-google-maps";
-import type { Day, Stop } from "@/lib/types";
+import type { Day, Profile, Stop } from "@/lib/types";
 import { CATEGORIES, DAY_COLORS } from "@/lib/constants";
-import { formatTimeRange, googleMapsUrl } from "@/lib/utils";
+import { formatTimeRange, getCreatorLabel, googleMapsUrl } from "@/lib/utils";
 import { PinMarker } from "./PinMarker";
 
 const DEFAULT_CENTER = { lat: 35.6762, lng: 139.6503 }; // Tokyo
 const UNSCHEDULED_COLOR = "#9ca3af";
 
-export function MapView({ stops, days }: { stops: Stop[]; days: Day[] }) {
+export function MapView({
+  stops,
+  days,
+  profiles = [],
+}: {
+  stops: Stop[];
+  days: Day[];
+  profiles?: Profile[];
+}) {
   const [selected, setSelected] = useState<Stop | null>(null);
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
 
@@ -20,7 +28,7 @@ export function MapView({ stops, days }: { stops: Stop[]; days: Day[] }) {
     : DEFAULT_CENTER;
 
   return (
-    <div className="flex h-[calc(100vh-49px)] w-full flex-col">
+    <div className="flex h-[calc(100dvh-49px)] w-full flex-col">
       {days.length > 0 && (
         <div className="flex flex-wrap gap-3 border-b border-zinc-200 px-4 py-2 text-xs dark:border-zinc-800">
           {days.map((day, i) => (
@@ -85,9 +93,16 @@ export function MapView({ stops, days }: { stops: Stop[]; days: Day[] }) {
                     {formatTimeRange(selected)}
                   </p>
                 )}
-                <p className="text-xs text-zinc-500">
-                  {CATEGORIES.find((c) => c.value === selected.category)
-                    ?.label ?? selected.category}
+                <p className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-500">
+                  <span>
+                    {CATEGORIES.find((c) => c.value === selected.category)
+                      ?.label ?? selected.category}
+                  </span>
+                  {getCreatorLabel(selected.created_by, profiles) && (
+                    <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-700">
+                      {getCreatorLabel(selected.created_by, profiles)}
+                    </span>
+                  )}
                 </p>
                 {selected.note && (
                   <p className="mt-1 text-zinc-600">{selected.note}</p>

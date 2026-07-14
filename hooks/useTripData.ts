@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import type { Day, Stop, Todo, Trip } from "@/lib/types";
+import type { Day, Profile, Stop, Todo, Trip } from "@/lib/types";
 
 export const TRIP_DATA_KEY = ["trip-data"];
 
@@ -21,7 +21,7 @@ export function useTripData() {
         throw tripError ?? new Error("No trip found for your account yet.");
       }
 
-      const [{ data: days }, { data: stops }, { data: todos }] =
+      const [{ data: days }, { data: stops }, { data: todos }, { data: profiles }] =
         await Promise.all([
           supabase
             .from("days")
@@ -38,6 +38,7 @@ export function useTripData() {
             .select("*")
             .eq("trip_id", trip.id)
             .order("sort_order"),
+          supabase.from("profiles").select("*"),
         ]);
 
       return {
@@ -45,6 +46,7 @@ export function useTripData() {
         days: (days ?? []) as Day[],
         stops: (stops ?? []) as Stop[],
         todos: (todos ?? []) as Todo[],
+        profiles: (profiles ?? []) as Profile[],
       };
     },
     staleTime: 60_000,

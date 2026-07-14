@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createTodo, deleteTodo, toggleTodo } from "@/lib/actions/todos";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import { getNextUpcomingItem } from "@/lib/utils";
-import type { Day, Stop, Todo } from "@/lib/types";
+import type { Day, Profile, Stop, Todo } from "@/lib/types";
 import { TimePicker } from "./TimePicker";
 import { TodoRow } from "./TodoRow";
 
@@ -28,15 +28,19 @@ export function TodoList({
   todos,
   days = [],
   stops = [],
+  profiles = [],
 }: {
   tripId: string;
   todos: Todo[];
   days?: Day[];
   stops?: Stop[];
+  profiles?: Profile[];
 }) {
   const [title, setTitle] = useState("");
+  const [note, setNote] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState("");
+  const [dayId, setDayId] = useState("");
   const [pending, startTransition] = useTransition();
   const queryClient = useQueryClient();
 
@@ -56,14 +60,18 @@ export function TodoList({
     startTransition(async () => {
       await createTodo({
         tripId,
+        dayId: dayId || undefined,
         title: title.trim(),
+        note: note || undefined,
         dueDate: dueDate || undefined,
         dueTime: dueTime || undefined,
         sortOrder: todos.length,
       });
       setTitle("");
+      setNote("");
       setDueDate("");
       setDueTime("");
+      setDayId("");
       invalidate();
     });
   }
@@ -102,6 +110,7 @@ export function TodoList({
             isNextUp={todo.id === nextTodoId}
             onToggle={() => handleToggle(todo)}
             onDelete={() => handleDelete(todo.id)}
+            profiles={profiles}
           />
         ))}
       </div>
@@ -139,6 +148,30 @@ export function TodoList({
             <TimePicker value={dueTime} onChange={setDueTime} />
           </div>
         </div>
+        <div>
+          <label className="block text-xs text-zinc-500">
+            Show under day (optional)
+          </label>
+          <select
+            value={dayId}
+            onChange={(e) => setDayId(e.target.value)}
+            className="mt-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            <option value="">Auto (match by due date)</option>
+            {days.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <textarea
+          placeholder="Note (optional)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={2}
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        />
         <button
           type="submit"
           disabled={pending}

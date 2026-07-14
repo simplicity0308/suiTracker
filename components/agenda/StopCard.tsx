@@ -3,20 +3,23 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
-import { formatTimeRange, googleMapsUrl } from "@/lib/utils";
-import type { Stop } from "@/lib/types";
+import { formatTimeRange, getCreatorLabel, googleMapsUrl } from "@/lib/utils";
+import type { Profile, Stop } from "@/lib/types";
 import { DeleteStopButton } from "./DeleteStopButton";
 
 export function StopCard({
   stop,
   isNextUp = false,
+  profiles = [],
 }: {
   stop: Stop;
   isNextUp?: boolean;
+  profiles?: Profile[];
 }) {
   const categoryLabel =
     CATEGORIES.find((c) => c.value === stop.category)?.label ?? stop.category;
   const timeRange = formatTimeRange(stop);
+  const creatorLabel = getCreatorLabel(stop.created_by, profiles);
 
   const {
     attributes,
@@ -56,7 +59,7 @@ export function StopCard({
         <p className="flex items-center gap-1.5 font-medium">
           {stop.name}
           {isNextUp && (
-            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
               Next up
             </span>
           )}
@@ -68,11 +71,16 @@ export function StopCard({
         )}
         <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-zinc-500">
           <span
-            className="rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+            className="rounded-full px-1.5 py-0.5 text-xs font-medium text-white"
             style={{ backgroundColor: CATEGORY_COLORS[stop.category] }}
           >
             {categoryLabel}
           </span>
+          {creatorLabel && (
+            <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">
+              {creatorLabel}
+            </span>
+          )}
           {stop.address && <span>{stop.address}</span>}
         </p>
         {stop.note && (
@@ -87,7 +95,7 @@ export function StopCard({
           Open in Maps
         </a>
       </div>
-      <DeleteStopButton id={stop.id} />
+      <DeleteStopButton id={stop.id} name={stop.name} />
     </div>
   );
 }
