@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Map as GoogleMap, InfoWindow } from "@vis.gl/react-google-maps";
 import type { Day, Profile, Stop } from "@/lib/types";
-import { CATEGORIES, DAY_COLORS } from "@/lib/constants";
+import { CATEGORIES, getDayColor } from "@/lib/constants";
 import { formatTimeRange, getCreatorLabel, googleMapsUrl } from "@/lib/utils";
 import { PinMarker } from "./PinMarker";
 
@@ -23,6 +23,7 @@ export function MapView({
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
 
   const dayIndexById = new Map(days.map((d, i) => [d.id, i]));
+  const dayById = new Map(days.map((d) => [d.id, d]));
   const center = stops[0]
     ? { lat: stops[0].lat, lng: stops[0].lng }
     : DEFAULT_CENTER;
@@ -35,7 +36,7 @@ export function MapView({
             <span key={day.id} className="flex items-center gap-1.5">
               <span
                 className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: DAY_COLORS[i % DAY_COLORS.length] }}
+                style={{ backgroundColor: getDayColor(i, days.length) }}
               />
               {day.label}
             </span>
@@ -63,7 +64,7 @@ export function MapView({
               : undefined;
             const color =
               dayIndex !== undefined
-                ? DAY_COLORS[dayIndex % DAY_COLORS.length]
+                ? getDayColor(dayIndex, days.length)
                 : UNSCHEDULED_COLOR;
 
             return (
@@ -87,6 +88,11 @@ export function MapView({
               onCloseClick={() => setSelected(null)}
             >
               <div className="max-w-[200px] text-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                  {selected.day_id
+                    ? dayById.get(selected.day_id)?.label ?? "Unscheduled"
+                    : "Unscheduled"}
+                </p>
                 <p className="font-medium">{selected.name}</p>
                 {formatTimeRange(selected) && (
                   <p className="text-xs font-medium text-zinc-600">

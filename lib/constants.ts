@@ -31,13 +31,13 @@ export const DURATION_OPTIONS: { value: number; label: string }[] = [
   { value: 480, label: "8 hr" },
 ];
 
-export const DAY_COLORS = [
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#06b6d4",
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-];
+/**
+ * Evenly spaces hues around the color wheel based on how many days the
+ * trip actually has, so colors never repeat regardless of trip length —
+ * a fixed palette collides (e.g. day 9 reusing day 1's color) on any trip
+ * longer than the palette size.
+ */
+export function getDayColor(index: number, total: number): string {
+  const hue = Math.round((index * 360) / Math.max(total, 1));
+  return `hsl(${hue}, 70%, 45%)`;
+}
