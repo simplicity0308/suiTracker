@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Japan Trip",
+  title: "SuiTracker",
   description: "Itinerary tracker for our Japan trip",
   icons: {
     icon: [
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Japan Trip",
+    title: "SuiTracker",
     statusBarStyle: "black-translucent",
   },
 };

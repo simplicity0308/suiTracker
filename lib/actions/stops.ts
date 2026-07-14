@@ -22,6 +22,11 @@ const createStopSchema = z.object({
   placeId: z.string().optional(),
   category: categoryEnum,
   note: z.string().optional(),
+  startTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .optional(),
+  durationMinutes: z.number().int().positive().optional(),
 });
 
 export async function createStop(input: z.infer<typeof createStopSchema>) {
@@ -55,6 +60,8 @@ export async function createStop(input: z.infer<typeof createStopSchema>) {
     place_id: parsed.placeId || null,
     category: parsed.category,
     note: parsed.note || null,
+    start_time: parsed.startTime || null,
+    duration_minutes: parsed.durationMinutes ?? null,
     sort_order: nextSortOrder,
     created_by: user?.id ?? null,
   });

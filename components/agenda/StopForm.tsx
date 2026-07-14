@@ -3,8 +3,9 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createStop } from "@/lib/actions/stops";
-import { CATEGORIES } from "@/lib/constants";
+import { CATEGORIES, DURATION_OPTIONS } from "@/lib/constants";
 import { PlaceAutocomplete, type PlaceResult } from "@/components/map/PlaceAutocomplete";
+import { TimePicker } from "./TimePicker";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import type { Category, Day } from "@/lib/types";
 
@@ -22,6 +23,8 @@ export function StopForm({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Category>("other");
   const [note, setNote] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("");
   const [dayId, setDayId] = useState<string>(defaultDayId ?? "");
   const [error, setError] = useState("");
   const queryClient = useQueryClient();
@@ -53,11 +56,15 @@ export function StopForm({
           placeId: place.placeId,
           category,
           note: note || undefined,
+          startTime: startTime || undefined,
+          durationMinutes: durationMinutes ? Number(durationMinutes) : undefined,
         });
         setPlace(null);
         setName("");
         setNote("");
         setCategory("other");
+        setStartTime("");
+        setDurationMinutes("");
         queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -109,6 +116,31 @@ export function StopForm({
             </option>
           ))}
         </select>
+        <div className="col-span-2">
+          <label className="block text-xs text-zinc-500">
+            Start time (optional)
+          </label>
+          <div className="mt-1">
+            <TimePicker value={startTime} onChange={setStartTime} />
+          </div>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-xs text-zinc-500">
+            Duration (optional)
+          </label>
+          <select
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(e.target.value)}
+            className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            <option value="">No duration</option>
+            {DURATION_OPTIONS.map((d) => (
+              <option key={d.value} value={d.value}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <textarea
           placeholder="Note (optional)"
           value={note}

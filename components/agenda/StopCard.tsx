@@ -3,13 +3,20 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
-import { googleMapsUrl } from "@/lib/utils";
+import { formatTimeRange, googleMapsUrl } from "@/lib/utils";
 import type { Stop } from "@/lib/types";
 import { DeleteStopButton } from "./DeleteStopButton";
 
-export function StopCard({ stop }: { stop: Stop }) {
+export function StopCard({
+  stop,
+  isNextUp = false,
+}: {
+  stop: Stop;
+  isNextUp?: boolean;
+}) {
   const categoryLabel =
     CATEGORIES.find((c) => c.value === stop.category)?.label ?? stop.category;
+  const timeRange = formatTimeRange(stop);
 
   const {
     attributes,
@@ -30,7 +37,11 @@ export function StopCard({ stop }: { stop: Stop }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-2 rounded-md border border-zinc-200 bg-white p-3 text-sm dark:border-zinc-800 dark:bg-zinc-950"
+      className={`flex items-start gap-2 rounded-md border bg-white p-3 text-sm dark:bg-zinc-950 ${
+        isNextUp
+          ? "border-l-4 border-blue-500 dark:border-l-blue-400"
+          : "border-zinc-200 dark:border-zinc-800"
+      }`}
     >
       <button
         type="button"
@@ -42,7 +53,19 @@ export function StopCard({ stop }: { stop: Stop }) {
         ⠿
       </button>
       <div className="flex-1">
-        <p className="font-medium">{stop.name}</p>
+        <p className="flex items-center gap-1.5 font-medium">
+          {stop.name}
+          {isNextUp && (
+            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              Next up
+            </span>
+          )}
+        </p>
+        {timeRange && (
+          <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+            {timeRange}
+          </p>
+        )}
         <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-zinc-500">
           <span
             className="rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"

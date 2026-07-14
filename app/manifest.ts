@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Japan Trip Itinerary",
-    short_name: "Japan Trip",
+    name: "SuiTracker",
+    short_name: "SuiTracker",
     description: "Our private day-by-day itinerary for Japan, September 2026",
     start_url: "/trip",
     display: "standalone",

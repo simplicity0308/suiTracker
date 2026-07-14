@@ -9,12 +9,59 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Day, Stop } from "@/lib/types";
+import type { Day, Stop, Todo } from "@/lib/types";
 import { renameDay, deleteDay } from "@/lib/actions/days";
+import { deleteTodo, toggleTodo } from "@/lib/actions/todos";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
+import { formatDayDate, isToday } from "@/lib/utils";
 import { StopCard } from "./StopCard";
+import { TodoRow } from "./TodoRow";
 
-export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
+type Entry =
+  | { kind: "stop"; id: string; time: string | null; order: number; stop: Stop }
+  | { kind: "todo"; id: string; time: string | null; order: number; todo: Todo };
+
+function buildEntries(stops: Stop[], todos: Todo[]): Entry[] {
+  const entries: Entry[] = [
+    ...stops.map((s) => ({
+      kind: "stop" as const,
+      id: s.id,
+      time: s.start_time,
+      order: s.sort_order,
+      stop: s,
+    })),
+    ...todos.map((t) => ({
+      kind: "todo" as const,
+      id: t.id,
+      time: t.due_time,
+      order: 1000 + t.sort_order,
+      todo: t,
+    })),
+  ];
+
+  entries.sort((a, b) => {
+    if (a.time && b.time) return a.time.localeCompare(b.time);
+    if (a.time && !b.time) return -1;
+    if (!a.time && b.time) return 1;
+    return a.order - b.order;
+  });
+
+  return entries;
+}
+
+export function DayColumn({
+  day,
+  stops,
+  todos = [],
+  nextStopId,
+  nextTodoId,
+}: {
+  day: Day | null;
+  stops: Stop[];
+  todos?: Todo[];
+  nextStopId?: string | null;
+  nextTodoId?: string | null;
+}) {
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(day?.label ?? "");
   const queryClient = useQueryClient();
@@ -39,12 +86,14 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
       }
     : undefined;
 
+  function invalidate() {
+    queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY });
+  }
+
   function handleRenameSubmit() {
     setEditing(false);
     if (day && label.trim() && label.trim() !== day.label) {
-      renameDay(day.id, label.trim()).then(() =>
-        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY })
-      );
+      renameDay(day.id, label.trim()).then(invalidate);
     } else if (day) {
       setLabel(day.label);
     }
@@ -53,11 +102,11 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
   function handleDelete() {
     if (!day) return;
     if (confirm(`Delete "${day.label}"? Its stops will move to Unscheduled.`)) {
-      deleteDay(day.id).then(() =>
-        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY })
-      );
+      deleteDay(day.id).then(invalidate);
     }
   }
+
+  const entries = buildEntries(stops, todos);
 
   return (
     <div ref={day ? setSortableRef : undefined} style={style} className="space-y-2">
@@ -96,7 +145,17 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
             }`}
           >
             {day ? day.label : "Unscheduled"}
+            {day?.day_date && (
+              <span className="ml-1.5 font-normal text-zinc-400">
+                — {formatDayDate(day.day_date)}
+              </span>
+            )}
           </h2>
+        )}
+        {day && isToday(day.day_date) && (
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+            Today
+          </span>
         )}
         {day && (
           <button
@@ -110,16 +169,33 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
       </div>
 
       <div ref={setDroppableRef} className="min-h-[40px] space-y-2 rounded-md">
-        {stops.length === 0 && (
-          <p className="text-xs text-zinc-400">No stops yet.</p>
+        {entries.length === 0 && (
+          <p className="text-xs text-zinc-400">Nothing yet.</p>
         )}
         <SortableContext
           items={stops.map((s) => s.id)}
           strategy={verticalListSortingStrategy}
         >
-          {stops.map((stop) => (
-            <StopCard key={stop.id} stop={stop} />
-          ))}
+          {entries.map((entry) =>
+            entry.kind === "stop" ? (
+              <StopCard
+                key={entry.id}
+                stop={entry.stop}
+                isNextUp={entry.id === nextStopId}
+              />
+            ) : (
+              <TodoRow
+                key={entry.id}
+                todo={entry.todo}
+                isNextUp={entry.id === nextTodoId}
+                showDate={false}
+                onToggle={() =>
+                  toggleTodo(entry.todo.id, !entry.todo.done).then(invalidate)
+                }
+                onDelete={() => deleteTodo(entry.todo.id).then(invalidate)}
+              />
+            )
+          )}
         </SortableContext>
       </div>
     </div>

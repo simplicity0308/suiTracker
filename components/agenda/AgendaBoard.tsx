@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -20,7 +20,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { reorderDays } from "@/lib/actions/days";
 import { reorderStops } from "@/lib/actions/stops";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
-import type { Day, Stop } from "@/lib/types";
+import { getNextUpcomingItem } from "@/lib/utils";
+import type { Day, Stop, Todo } from "@/lib/types";
 import { DayColumn } from "./DayColumn";
 
 const UNSCHEDULED = "container:unscheduled";
@@ -30,9 +31,11 @@ const containerKey = (dayId: string | null) =>
 export function AgendaBoard({
   days: propDays,
   stops: propStops,
+  todos,
 }: {
   days: Day[];
   stops: Stop[];
+  todos: Todo[];
 }) {
   const [days, setDays] = useState(propDays);
   const [stops, setStops] = useState(propStops);
@@ -54,10 +57,22 @@ export function AgendaBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
+  const nextItem = useMemo(
+    () => getNextUpcomingItem(days, stops, todos),
+    [days, stops, todos]
+  );
+  const nextStopId = nextItem?.kind === "stop" ? nextItem.id : null;
+  const nextTodoId = nextItem?.kind === "todo" ? nextItem.id : null;
+
   function stopsByDay(dayId: string | null) {
     return stops
       .filter((s) => s.day_id === dayId)
       .sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  function todosForDay(dayDate: string | null) {
+    if (!dayDate) return [];
+    return todos.filter((t) => t.due_date === dayDate);
   }
 
   function findContainerOf(id: string): string | null {
@@ -162,13 +177,20 @@ export function AgendaBoard({
       >
         <div className="space-y-6">
           {days.map((day) => (
-            <DayColumn key={day.id} day={day} stops={stopsByDay(day.id)} />
+            <DayColumn
+              key={day.id}
+              day={day}
+              stops={stopsByDay(day.id)}
+              todos={todosForDay(day.day_date)}
+              nextStopId={nextStopId}
+              nextTodoId={nextTodoId}
+            />
           ))}
         </div>
       </SortableContext>
 
       <div className="mt-6">
-        <DayColumn day={null} stops={stopsByDay(null)} />
+        <DayColumn day={null} stops={stopsByDay(null)} nextStopId={nextStopId} />
       </div>
 
       <DragOverlay>

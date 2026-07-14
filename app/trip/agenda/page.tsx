@@ -27,7 +27,7 @@ export default function AgendaPage() {
     );
   }
 
-  const { trip, days: dayList, stops: stopList } = data;
+  const { trip, days: dayList, stops: stopList, todos: todoList } = data;
 
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">
@@ -52,7 +52,7 @@ export default function AgendaPage() {
         there. Drag stops (and days) to reorder.
       </p>
 
-      <AgendaBoard days={dayList} stops={stopList} />
+      <AgendaBoard days={dayList} stops={stopList} todos={todoList} />
     </main>
   );
 }

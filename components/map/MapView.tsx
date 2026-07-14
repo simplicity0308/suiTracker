@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Map as GoogleMap, InfoWindow } from "@vis.gl/react-google-maps";
 import type { Day, Stop } from "@/lib/types";
 import { CATEGORIES, DAY_COLORS } from "@/lib/constants";
-import { googleMapsUrl } from "@/lib/utils";
+import { formatTimeRange, googleMapsUrl } from "@/lib/utils";
 import { PinMarker } from "./PinMarker";
 
 const DEFAULT_CENTER = { lat: 35.6762, lng: 139.6503 }; // Tokyo
@@ -80,6 +80,11 @@ export function MapView({ stops, days }: { stops: Stop[]; days: Day[] }) {
             >
               <div className="max-w-[200px] text-sm">
                 <p className="font-medium">{selected.name}</p>
+                {formatTimeRange(selected) && (
+                  <p className="text-xs font-medium text-zinc-600">
+                    {formatTimeRange(selected)}
+                  </p>
+                )}
                 <p className="text-xs text-zinc-500">
                   {CATEGORIES.find((c) => c.value === selected.category)
                     ?.label ?? selected.category}
