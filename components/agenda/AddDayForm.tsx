@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { createDay } from "@/lib/actions/days";
+import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 
 export function AddDayForm({
   tripId,
@@ -13,6 +15,7 @@ export function AddDayForm({
   const [label, setLabel] = useState("");
   const [dayDate, setDayDate] = useState("");
   const [pending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -25,6 +28,7 @@ export function AddDayForm({
       });
       setLabel("");
       setDayDate("");
+      queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY });
     });
   }
 

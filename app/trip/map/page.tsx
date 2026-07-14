@@ -1,43 +1,31 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
 import { MapView } from "@/components/map/MapView";
 import { StopForm } from "@/components/agenda/StopForm";
-import type { Day, Stop } from "@/lib/types";
+import { useTripData } from "@/hooks/useTripData";
 
-export default async function MapPage() {
-  const supabase = await createClient();
+export default function MapPage() {
+  const { data, isPending, isError, error } = useTripData();
 
-  const { data: trip, error: tripError } = await supabase
-    .from("trips")
-    .select("*")
-    .limit(1)
-    .single();
-
-  if (tripError || !trip) {
+  if (isPending) {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <p className="text-sm text-red-600">
-          No trip found for your account yet. Make sure the trip has been
-          seeded and your user added to trip_members.
-        </p>
+        <p className="text-sm text-zinc-500">Loading your itinerary…</p>
       </main>
     );
   }
 
-  const [{ data: days }, { data: stops }] = await Promise.all([
-    supabase
-      .from("days")
-      .select("*")
-      .eq("trip_id", trip.id)
-      .order("sort_order"),
-    supabase
-      .from("stops")
-      .select("*")
-      .eq("trip_id", trip.id)
-      .order("sort_order"),
-  ]);
-
-  const dayList = (days ?? []) as Day[];
-  const stopList = (stops ?? []) as Stop[];
+  if (!data) {
+    return (
+      <main className="mx-auto max-w-2xl p-6">
+        <p className="text-sm text-red-600">
+          {isError && error instanceof Error
+            ? error.message
+            : "No trip found for your account yet. Make sure the trip has been seeded and your user added to trip_members."}
+        </p>
+      </main>
+    );
+  }
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
     return (
@@ -49,6 +37,8 @@ export default async function MapPage() {
       </main>
     );
   }
+
+  const { trip, days: dayList, stops: stopList } = data;
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">

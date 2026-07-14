@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Map as GoogleMap, InfoWindow } from "@vis.gl/react-google-maps";
 import type { Day, Stop } from "@/lib/types";
 import { CATEGORIES, DAY_COLORS } from "@/lib/constants";
+import { googleMapsUrl } from "@/lib/utils";
 import { PinMarker } from "./PinMarker";
 
 const DEFAULT_CENTER = { lat: 35.6762, lng: 139.6503 }; // Tokyo
@@ -86,6 +87,14 @@ export function MapView({ stops, days }: { stops: Stop[]; days: Day[] }) {
                 {selected.note && (
                   <p className="mt-1 text-zinc-600">{selected.note}</p>
                 )}
+                <a
+                  href={googleMapsUrl(selected)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block text-blue-600 hover:underline"
+                >
+                  Open in Maps
+                </a>
               </div>
             </InfoWindow>
           )}

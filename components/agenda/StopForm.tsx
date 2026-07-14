@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { createStop } from "@/lib/actions/stops";
 import { CATEGORIES } from "@/lib/constants";
 import { PlaceAutocomplete, type PlaceResult } from "@/components/map/PlaceAutocomplete";
+import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import type { Category, Day } from "@/lib/types";
 
 export function StopForm({
@@ -22,6 +24,7 @@ export function StopForm({
   const [note, setNote] = useState("");
   const [dayId, setDayId] = useState<string>(defaultDayId ?? "");
   const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
   function handlePlaceSelect(selected: PlaceResult) {
     setPlace(selected);
@@ -55,6 +58,7 @@ export function StopForm({
         setName("");
         setNote("");
         setCategory("other");
+        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }

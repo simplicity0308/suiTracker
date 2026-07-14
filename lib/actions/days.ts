@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,7 +20,6 @@ export async function createDay(input: z.infer<typeof createDaySchema>) {
     sort_order: sortOrder,
   });
   if (error) throw error;
-  revalidatePath("/trip/agenda");
 }
 
 export async function renameDay(dayId: string, label: string) {
@@ -31,14 +29,12 @@ export async function renameDay(dayId: string, label: string) {
     .update({ label })
     .eq("id", dayId);
   if (error) throw error;
-  revalidatePath("/trip/agenda");
 }
 
 export async function deleteDay(dayId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("days").delete().eq("id", dayId);
   if (error) throw error;
-  revalidatePath("/trip/agenda");
 }
 
 export async function reorderDays(orderedIds: string[]) {
@@ -52,7 +48,4 @@ export async function reorderDays(orderedIds: string[]) {
   );
   const failed = results.find((r) => r.error);
   if (failed?.error) throw failed.error;
-
-  revalidatePath("/trip/agenda");
-  revalidatePath("/trip/map");
 }

@@ -8,13 +8,16 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Day, Stop } from "@/lib/types";
 import { renameDay, deleteDay } from "@/lib/actions/days";
+import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import { StopCard } from "./StopCard";
 
 export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(day?.label ?? "");
+  const queryClient = useQueryClient();
 
   const containerId = day ? `container:${day.id}` : "container:unscheduled";
   const { setNodeRef: setDroppableRef } = useDroppable({ id: containerId });
@@ -39,7 +42,9 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
   function handleRenameSubmit() {
     setEditing(false);
     if (day && label.trim() && label.trim() !== day.label) {
-      renameDay(day.id, label.trim());
+      renameDay(day.id, label.trim()).then(() =>
+        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY })
+      );
     } else if (day) {
       setLabel(day.label);
     }
@@ -48,7 +53,9 @@ export function DayColumn({ day, stops }: { day: Day | null; stops: Stop[] }) {
   function handleDelete() {
     if (!day) return;
     if (confirm(`Delete "${day.label}"? Its stops will move to Unscheduled.`)) {
-      deleteDay(day.id);
+      deleteDay(day.id).then(() =>
+        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY })
+      );
     }
   }
 

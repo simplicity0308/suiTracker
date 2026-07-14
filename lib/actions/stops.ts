@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,8 +59,6 @@ export async function createStop(input: z.infer<typeof createStopSchema>) {
     created_by: user?.id ?? null,
   });
   if (error) throw error;
-  revalidatePath("/trip/agenda");
-  revalidatePath("/trip/map");
 }
 
 const updateStopSchema = z.object({
@@ -86,16 +83,12 @@ export async function updateStop(input: z.infer<typeof updateStopSchema>) {
 
   const { error } = await supabase.from("stops").update(patch).eq("id", id);
   if (error) throw error;
-  revalidatePath("/trip/agenda");
-  revalidatePath("/trip/map");
 }
 
 export async function deleteStop(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("stops").delete().eq("id", id);
   if (error) throw error;
-  revalidatePath("/trip/agenda");
-  revalidatePath("/trip/map");
 }
 
 const reorderStopsSchema = z.array(
@@ -122,7 +115,4 @@ export async function reorderStops(
   );
   const failed = results.find((r) => r.error);
   if (failed?.error) throw failed.error;
-
-  revalidatePath("/trip/agenda");
-  revalidatePath("/trip/map");
 }

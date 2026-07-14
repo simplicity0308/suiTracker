@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,8 +16,10 @@ import {
   arrayMove,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useQueryClient } from "@tanstack/react-query";
 import { reorderDays } from "@/lib/actions/days";
 import { reorderStops } from "@/lib/actions/stops";
+import { TRIP_DATA_KEY } from "@/hooks/useTripData";
 import type { Day, Stop } from "@/lib/types";
 import { DayColumn } from "./DayColumn";
 
@@ -26,15 +28,27 @@ const containerKey = (dayId: string | null) =>
   dayId === null ? UNSCHEDULED : `container:${dayId}`;
 
 export function AgendaBoard({
-  days: initialDays,
-  stops: initialStops,
+  days: propDays,
+  stops: propStops,
 }: {
   days: Day[];
   stops: Stop[];
 }) {
-  const [days, setDays] = useState(initialDays);
-  const [stops, setStops] = useState(initialStops);
+  const [days, setDays] = useState(propDays);
+  const [stops, setStops] = useState(propStops);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Resync when the underlying query refetches (e.g. a sibling component's
+  // mutation invalidated the shared trip-data cache) — local state only
+  // exists for optimistic feedback during drags, not as the source of truth.
+  useEffect(() => {
+    setDays(propDays);
+  }, [propDays]);
+
+  useEffect(() => {
+    setStops(propStops);
+  }, [propStops]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -73,7 +87,9 @@ export function AgendaBoard({
       if (oldIndex === -1 || newIndex === -1) return;
       const reordered = arrayMove(days, oldIndex, newIndex);
       setDays(reordered);
-      reorderDays(reordered.map((d) => d.id));
+      reorderDays(reordered.map((d) => d.id)).then(() =>
+        queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY })
+      );
       return;
     }
 
@@ -127,7 +143,7 @@ export function AgendaBoard({
         dayId: s.day_id,
         sortOrder: s.sort_order,
       }))
-    );
+    ).then(() => queryClient.invalidateQueries({ queryKey: TRIP_DATA_KEY }));
   }
 
   const activeStop = activeId ? stops.find((s) => s.id === activeId) : null;

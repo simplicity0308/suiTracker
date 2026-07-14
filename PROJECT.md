@@ -15,7 +15,7 @@ A private, 2-person web app for planning a Japan trip in **September 2026**: pin
 - **Scope:** Map pins organized into a day-by-day schedule, each stop has a note + category. No budget tracking, no booking links/confirmation numbers, no checklists — keep scope tight.
 - **Offline:** View-only offline support (see the saved itinerary without signal, e.g. on a train). Adding/editing while offline is explicitly out of scope (would need a write-queue/conflict-resolution system not worth the complexity here).
 - **Mobile:** Must be installable via "Add to Home Screen" (PWA) on both iOS and Android.
-- **Domain:** Registered at **Exabyte**. Will use subdomain `trip.<theirdomain>` (not root) via a CNAME record pointing at Vercel.
+- **Domain:** Registered at **Exabyte**. Live at subdomain `trip.benjamin0308.my` via a CNAME record pointing at Vercel.
 
 ## Decisions changed after initial planning
 
@@ -27,17 +27,35 @@ A private, 2-person web app for planning a Japan trip in **September 2026**: pin
 
 - **DB schema:** `trips`, `trip_members` (join table gating access), `days`, `stops`. Full SQL in `supabase/migrations/0001_init.sql`. RLS restricts all access to rows where `auth.uid()` is in `trip_members` for that trip, via a `security definer` helper function `is_trip_member(trip_id)`.
 - **One trip, seeded manually** via `supabase/seed_trip.sql` (user filled in the real UUIDs after creating the 2 auth accounts). No self-serve "create a trip" UI by design — add one later only if a second trip actually happens.
-- **Server Actions** (`lib/actions/*.ts`) handle all mutations, calling `revalidatePath` after. No REST API routes needed.
+- **Server Actions** (`lib/actions/*.ts`) handle all mutations. No REST API routes needed.
 - **Supabase clients:** `lib/supabase/client.ts` (browser), `lib/supabase/server.ts` (server components/actions), both via `@supabase/ssr`.
-- **Route structure:** `/login` (public), everything under `/trip/*` gated by `proxy.ts`. `/trip/agenda` = day-by-day list + day management. `/trip/map` = Google Map with search-and-pin (Phase 2).
+- **Route structure:** `/login` (public), everything under `/trip/*` gated by `proxy.ts`. `/trip/agenda` = day-by-day list + day management. `/trip/map` = Google Map with search-and-pin.
+- **Data fetching (Phase 4 change):** `/trip/agenda` and `/trip/map` are now client components fetching via `useTripData()` (`hooks/useTripData.ts`, TanStack Query) instead of Server Components — required for offline viewing (see below). Mutating components call `queryClient.invalidateQueries` after their server action resolves to refresh the shared cache; `revalidatePath` was removed from the actions since it's now a no-op (nothing server-rendered depends on this data anymore).
+- **Offline support:** `QueryProvider` (`components/providers/QueryProvider.tsx`) persists the TanStack Query cache to `localStorage` (14-day max age), so the last-loaded itinerary renders even with no network. Service worker via `@serwist/turbopack` (this Next.js version defaults to Turbopack, which the older `@serwist/next` webpack plugin doesn't support) — route handler at `app/serwist/[path]/route.ts`, worker source at `app/sw.ts`. Google Maps domains (`googleapis.com`/`gstatic.com`) are explicitly excluded from all caching in `app/sw.ts` (ToS requirement) — the map itself won't work offline, only the itinerary data/list.
+- **Important:** `proxy.ts`'s route matcher excludes `/serwist` and `/manifest.webmanifest` from the auth gate — without this, an unauthenticated service-worker registration request gets redirected to `/login`, which browsers reject outright (`SecurityError: ... behind a redirect`). Hit this exact bug once; if the matcher regex is ever touched again, keep those exclusions.
+- **PWA install:** `app/manifest.ts` + `appleWebApp`/`icons` metadata in `app/layout.tsx`. Icons are a hand-authored Mount Fuji SVG (`public/icons/`, sunrise-over-Fuji style, generated via `sharp`, no external image API). `components/layout/InstallPrompt.tsx` shows a real Install button on Android/Chrome (`beforeinstallprompt`) or manual "Add to Home Screen" instructions on iOS.
+- **"Open in Google Maps"** — `lib/utils.ts`'s `googleMapsUrl()` builds a plain deep-link URL (no Maps JS API call, zero billing impact), used in `StopCard.tsx` and `MapView.tsx`'s InfoWindow.
 
 ## External accounts / resources
 
 - **Supabase project:** ref `agvmnelzuvsadyajrhtd` (URL `https://agvmnelzuvsadyajrhtd.supabase.co`). Region and org are in the user's Supabase account. Keys live in `.env.local` (gitignored) — never commit them, though the anon key is safe to expose client-side by design. Service role key is intentionally never used anywhere in this app.
 - **GitHub:** `https://github.com/simplicity0308/suiTracker.git`, branch `main`.
-- **Google Cloud / Maps API key:** not yet created — needed for Phase 2. Requires billing enabled (free tier should cover our usage, ~$0 expected), Maps JavaScript API + Places API enabled, a Map ID (for `AdvancedMarker`), and an HTTP-referrer-restricted API key.
-- **Vercel:** not yet connected — planned for Phase 5 deployment, or earlier once there's something worth previewing.
-- **Domain registrar:** Exabyte (exact DNS panel steps TBD — generic CNAME instructions apply, look for "DNS Management" or "Zone Editor").
+- **Google Cloud / Maps API key:** created and working (Phase 2). Maps JavaScript API + Places API enabled, Map ID created for `AdvancedMarker`. Key is currently **unrestricted** (no HTTP-referrer allowlist yet) — that lock-down is still a pending Phase 5 hardening item, now that the real domain and Vercel preview domains both exist to add to the allowlist.
+- **Vercel:** connected. Project imported from the GitHub repo, auto-deploys on push to `main`. Env vars set in the Vercel dashboard (Project → Settings → Environment Variables): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` (mirrors `.env.local`). Preview URL: `sui-tracker-eight.vercel.app`.
+- **Domain registrar:** Exabyte. Domain is `benjamin0308.my`. Their DNS panel (Portal Home → DNS Manager) required creating a **DNS Zone first** before individual records could be added — a one-time "Add DNS Zone" step that asks for a root IP address (used Vercel's published apex IP `76.76.21.21` to initialize it, harmless/optional bonus that also points the bare `benjamin0308.my` at Vercel). After the zone existed, the actual CNAME record was added: host `trip`, value `e333086935603fe1.vercel-dns-017.com` (the exact value Vercel's Domains page displayed for this project — copy the live value from Vercel rather than reusing this one if the project or domain ever changes). Propagated in minutes; SSL issued automatically by Vercel shortly after.
+
+## Adding a temporary/test user
+
+Public signup is disabled by design, so a test account has to be created the same admin way the original 2 accounts were:
+
+1. Supabase Dashboard → **Authentication → Users → Add User** — any email/password works; dashboard-created users are auto-confirmed (no verification email sent). This doesn't weaken the "no public signup" guarantee since it's an admin action, not an open signup form.
+2. That's sufficient to test login/install/PWA behavior. The new account will **not** see any trip data by default (RLS blocks it) — it'll just show "No trip found for your account yet."
+3. To let it see/edit the real itinerary too: get the trip's `id` from Supabase (`select id, name from public.trips;` in the SQL Editor, or Table Editor → `trips`), get the new user's UUID from Authentication → Users, then in the SQL Editor:
+   ```sql
+   insert into trip_members (trip_id, user_id)
+   values ('<trip-id>', '<new-user-uuid>');
+   ```
+4. Delete the user from Authentication → Users when done testing, to get back to exactly 2 real accounts.
 
 ## Build status (phases from the original plan)
 
@@ -46,8 +64,8 @@ A private, 2-person web app for planning a Japan trip in **September 2026**: pin
 - [x] Phase 1 — Auth (password-based) + basic day/stop CRUD, verified working end-to-end by user, pushed to GitHub
 - [x] Phase 2 — Google Maps pin UI (search-and-pin via Places Autocomplete, day-colored/numbered pins), GCP project + Maps API key + Map ID set up, verified working by user
 - [x] Phase 3 — Agenda polish: drag-reorder stops within/across days via dnd-kit, drag-reorder days, inline day rename/delete, category color pills, `sort_order` collision bug fixed. Verified working by user.
-- [ ] Phase 4 — PWA + offline support
-- [ ] Phase 5 — Deploy + custom domain (`trip.<exabyte-domain>`) + hardening
+- [~] Phase 4 — PWA + offline support: manifest, Mount Fuji icon set, appleWebApp metadata, install prompt, Serwist service worker (Turbopack variant), client-side data fetching + localStorage-persisted TanStack Query cache for offline viewing. Also added a small "Open in Google Maps" deep-link button while in this phase. Build passes; **mobile install + airplane-mode testing deliberately deferred by user** — needs a real HTTPS URL to test properly, which Phase 5's domain work (done below) now provides.
+- [~] Phase 5 — Deploy + custom domain + hardening. Done: Vercel connected + auto-deploy, `trip.benjamin0308.my` live over HTTPS via Exabyte CNAME → Vercel, SSL issued. Still pending: add the live domain + Vercel preview domain to the Google Maps API key's HTTP-referrer allowlist, RLS sanity check with a second/throwaway account, loading/empty/error state polish, mobile responsiveness pass, and the deferred Phase 4 mobile PWA test (now unblocked — real HTTPS URL exists at `https://trip.benjamin0308.my`).
 
 ## Environment variables (`.env.local`, gitignored)
 

@@ -1,43 +1,33 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
 import { AddDayForm } from "@/components/agenda/AddDayForm";
 import { AgendaBoard } from "@/components/agenda/AgendaBoard";
-import type { Day, Stop } from "@/lib/types";
+import { useTripData } from "@/hooks/useTripData";
 
-export default async function AgendaPage() {
-  const supabase = await createClient();
+export default function AgendaPage() {
+  const { data, isPending, isError, error } = useTripData();
 
-  const { data: trip, error: tripError } = await supabase
-    .from("trips")
-    .select("*")
-    .limit(1)
-    .single();
+  if (isPending) {
+    return (
+      <main className="mx-auto max-w-2xl p-6">
+        <p className="text-sm text-zinc-500">Loading your itinerary…</p>
+      </main>
+    );
+  }
 
-  if (tripError || !trip) {
+  if (!data) {
     return (
       <main className="mx-auto max-w-2xl p-6">
         <p className="text-sm text-red-600">
-          No trip found for your account yet. Make sure the trip has been
-          seeded and your user added to trip_members.
+          {isError && error instanceof Error
+            ? error.message
+            : "No trip found for your account yet. Make sure the trip has been seeded and your user added to trip_members."}
         </p>
       </main>
     );
   }
 
-  const [{ data: days }, { data: stops }] = await Promise.all([
-    supabase
-      .from("days")
-      .select("*")
-      .eq("trip_id", trip.id)
-      .order("sort_order"),
-    supabase
-      .from("stops")
-      .select("*")
-      .eq("trip_id", trip.id)
-      .order("sort_order"),
-  ]);
-
-  const dayList = (days ?? []) as Day[];
-  const stopList = (stops ?? []) as Stop[];
+  const { trip, days: dayList, stops: stopList } = data;
 
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">

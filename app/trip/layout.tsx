@@ -1,6 +1,8 @@
 import { MapsProvider } from "@/components/map/MapsProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { NavTabs } from "@/components/layout/NavTabs";
 import { SignOutButton } from "@/components/layout/SignOutButton";
+import { InstallPrompt } from "@/components/layout/InstallPrompt";
 
 export default function TripLayout({
   children,
@@ -8,14 +10,17 @@ export default function TripLayout({
   children: React.ReactNode;
 }) {
   return (
-    <MapsProvider>
-      <div className="flex min-h-full flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <NavTabs />
-          <SignOutButton />
-        </header>
-        <div className="flex-1">{children}</div>
-      </div>
-    </MapsProvider>
+    <QueryProvider>
+      <MapsProvider>
+        <div className="flex min-h-full flex-1 flex-col">
+          <InstallPrompt />
+          <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+            <NavTabs />
+            <SignOutButton />
+          </header>
+          <div className="flex-1">{children}</div>
+        </div>
+      </MapsProvider>
+    </QueryProvider>
   );
 }

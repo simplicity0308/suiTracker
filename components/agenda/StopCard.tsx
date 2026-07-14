@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
+import { googleMapsUrl } from "@/lib/utils";
 import type { Stop } from "@/lib/types";
 import { DeleteStopButton } from "./DeleteStopButton";
 
@@ -54,6 +55,14 @@ export function StopCard({ stop }: { stop: Stop }) {
         {stop.note && (
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">{stop.note}</p>
         )}
+        <a
+          href={googleMapsUrl(stop)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
+        >
+          Open in Maps
+        </a>
       </div>
       <DeleteStopButton id={stop.id} />
     </div>
