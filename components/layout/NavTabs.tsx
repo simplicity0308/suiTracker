@@ -12,18 +12,18 @@ const TABS = [
 export function NavTabs() {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-4 text-sm font-medium">
+    <nav className="flex gap-5 text-sm font-medium">
       {TABS.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
           <Link
             key={tab.href}
             href={tab.href}
-            className={
+            className={`border-b-2 pb-0.5 transition-colors ${
               active
-                ? "text-zinc-900 dark:text-zinc-50"
-                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-            }
+                ? "border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-300"
+                : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            }`}
           >
             {tab.label}
           </Link>

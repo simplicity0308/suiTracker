@@ -59,7 +59,7 @@ export function AddDayForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium disabled:opacity-50 dark:border-zinc-700"
+        className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
         {pending ? "Adding…" : "Add day"}
       </button>

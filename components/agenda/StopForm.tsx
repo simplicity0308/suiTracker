@@ -153,7 +153,7 @@ export function StopForm({
       <button
         type="submit"
         disabled={pending || !place}
-        className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+        className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
         {pending ? "Adding…" : "Add stop"}
       </button>

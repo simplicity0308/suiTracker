@@ -1,8 +1,11 @@
+import { Yuji_Syuku } from "next/font/google";
 import { MapsProvider } from "@/components/map/MapsProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { NavTabs } from "@/components/layout/NavTabs";
 import { SignOutButton } from "@/components/layout/SignOutButton";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
+
+const yujiSyuku = Yuji_Syuku({ weight: "400", subsets: ["latin"] });
 
 export default function TripLayout({
   children,
@@ -14,9 +17,16 @@ export default function TripLayout({
       <MapsProvider>
         <div className="flex min-h-full flex-1 flex-col">
           <InstallPrompt />
-          <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+          <header className="flex items-center gap-6 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+            <span
+              className={`${yujiSyuku.className} text-lg text-[#182349] dark:text-blue-300`}
+            >
+              SuiTracker
+            </span>
             <NavTabs />
-            <SignOutButton />
+            <div className="ml-auto">
+              <SignOutButton />
+            </div>
           </header>
           <div className="flex-1">{children}</div>
         </div>

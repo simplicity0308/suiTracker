@@ -61,7 +61,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleInstall}
-              className="rounded-md bg-zinc-900 px-2 py-1 font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+              className="rounded-md bg-blue-600 px-2 py-1 font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
               Install
             </button>
