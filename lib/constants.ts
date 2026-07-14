@@ -9,6 +9,15 @@ export const CATEGORIES: { value: Category; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+export const CATEGORY_COLORS: Record<Category, string> = {
+  food: "#f97316",
+  sight: "#3b82f6",
+  hotel: "#8b5cf6",
+  transport: "#14b8a6",
+  shopping: "#ec4899",
+  other: "#71717a",
+};
+
 export const DAY_COLORS = [
   "#ef4444",
   "#f97316",

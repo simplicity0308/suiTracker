@@ -40,3 +40,19 @@ export async function deleteDay(dayId: string) {
   if (error) throw error;
   revalidatePath("/trip/agenda");
 }
+
+export async function reorderDays(orderedIds: string[]) {
+  const ids = z.array(z.string().uuid()).parse(orderedIds);
+  const supabase = await createClient();
+
+  const results = await Promise.all(
+    ids.map((id, index) =>
+      supabase.from("days").update({ sort_order: index }).eq("id", id)
+    )
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw failed.error;
+
+  revalidatePath("/trip/agenda");
+  revalidatePath("/trip/map");
+}

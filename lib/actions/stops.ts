@@ -23,7 +23,6 @@ const createStopSchema = z.object({
   placeId: z.string().optional(),
   category: categoryEnum,
   note: z.string().optional(),
-  sortOrder: z.number().int(),
 });
 
 export async function createStop(input: z.infer<typeof createStopSchema>) {
@@ -32,6 +31,20 @@ export async function createStop(input: z.infer<typeof createStopSchema>) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  let lastOrderQuery = supabase
+    .from("stops")
+    .select("sort_order")
+    .eq("trip_id", parsed.tripId)
+    .order("sort_order", { ascending: false })
+    .limit(1);
+  lastOrderQuery =
+    parsed.dayId === null
+      ? lastOrderQuery.is("day_id", null)
+      : lastOrderQuery.eq("day_id", parsed.dayId);
+  const { data: lastStop } = await lastOrderQuery;
+  const nextSortOrder =
+    lastStop && lastStop.length > 0 ? lastStop[0].sort_order + 1 : 0;
 
   const { error } = await supabase.from("stops").insert({
     trip_id: parsed.tripId,
@@ -43,7 +56,7 @@ export async function createStop(input: z.infer<typeof createStopSchema>) {
     place_id: parsed.placeId || null,
     category: parsed.category,
     note: parsed.note || null,
-    sort_order: parsed.sortOrder,
+    sort_order: nextSortOrder,
     created_by: user?.id ?? null,
   });
   if (error) throw error;
@@ -81,6 +94,35 @@ export async function deleteStop(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("stops").delete().eq("id", id);
   if (error) throw error;
+  revalidatePath("/trip/agenda");
+  revalidatePath("/trip/map");
+}
+
+const reorderStopsSchema = z.array(
+  z.object({
+    id: z.string().uuid(),
+    dayId: z.string().uuid().nullable(),
+    sortOrder: z.number().int(),
+  })
+);
+
+export async function reorderStops(
+  input: z.infer<typeof reorderStopsSchema>
+) {
+  const updates = reorderStopsSchema.parse(input);
+  const supabase = await createClient();
+
+  const results = await Promise.all(
+    updates.map((u) =>
+      supabase
+        .from("stops")
+        .update({ day_id: u.dayId, sort_order: u.sortOrder })
+        .eq("id", u.id)
+    )
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw failed.error;
+
   revalidatePath("/trip/agenda");
   revalidatePath("/trip/map");
 }

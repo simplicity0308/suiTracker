@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AddDayForm } from "@/components/agenda/AddDayForm";
-import { DayColumn } from "@/components/agenda/DayColumn";
+import { AgendaBoard } from "@/components/agenda/AgendaBoard";
 import type { Day, Stop } from "@/lib/types";
 
 export default async function AgendaPage() {
@@ -39,13 +39,6 @@ export default async function AgendaPage() {
   const dayList = (days ?? []) as Day[];
   const stopList = (stops ?? []) as Stop[];
 
-  const stopsByDay = new Map<string | null, Stop[]>();
-  for (const stop of stopList) {
-    const key = stop.day_id;
-    if (!stopsByDay.has(key)) stopsByDay.set(key, []);
-    stopsByDay.get(key)!.push(stop);
-  }
-
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">
       <div>
@@ -66,15 +59,10 @@ export default async function AgendaPage() {
 
       <p className="text-xs text-zinc-500">
         To add a stop, search for it on the Map tab and assign it to a day
-        there.
+        there. Drag stops (and days) to reorder.
       </p>
 
-      <section className="space-y-6">
-        {dayList.map((day) => (
-          <DayColumn key={day.id} day={day} stops={stopsByDay.get(day.id) ?? []} />
-        ))}
-        <DayColumn day={null} stops={stopsByDay.get(null) ?? []} />
-      </section>
+      <AgendaBoard days={dayList} stops={stopList} />
     </main>
   );
 }

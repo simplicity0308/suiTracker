@@ -50,7 +50,6 @@ export function StopForm({
           placeId: place.placeId,
           category,
           note: note || undefined,
-          sortOrder: 0,
         });
         setPlace(null);
         setName("");

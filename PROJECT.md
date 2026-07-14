@@ -44,8 +44,8 @@ A private, 2-person web app for planning a Japan trip in **September 2026**: pin
 - [x] Phase 0 — Next.js scaffold, git init, Supabase migration SQL written
 - [x] Phase 0b — Supabase project created, 2 users seeded, signup disabled, `.env.local` wired
 - [x] Phase 1 — Auth (password-based) + basic day/stop CRUD, verified working end-to-end by user, pushed to GitHub
-- [ ] Phase 2 — Google Maps pin UI (in progress — needs user to create GCP project + Maps API key + Map ID)
-- [ ] Phase 3 — Agenda polish (drag-reorder, move between days)
+- [x] Phase 2 — Google Maps pin UI (search-and-pin via Places Autocomplete, day-colored/numbered pins), GCP project + Maps API key + Map ID set up, verified working by user
+- [x] Phase 3 — Agenda polish: drag-reorder stops within/across days via dnd-kit, drag-reorder days, inline day rename/delete, category color pills, `sort_order` collision bug fixed. Verified working by user.
 - [ ] Phase 4 — PWA + offline support
 - [ ] Phase 5 — Deploy + custom domain (`trip.<exabyte-domain>`) + hardening
 
