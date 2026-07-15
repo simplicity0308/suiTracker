@@ -9,7 +9,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Day, Profile, Stop, Todo } from "@/lib/types";
+import type { Day, Profile, Stop, StopWeather, Todo } from "@/lib/types";
 import { renameDay, deleteDay } from "@/lib/actions/days";
 import { deleteTodo, toggleTodo } from "@/lib/actions/todos";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
@@ -56,6 +56,7 @@ export function DayColumn({
   nextStopId,
   nextTodoId,
   profiles = [],
+  weatherByStopId,
 }: {
   day: Day | null;
   stops: Stop[];
@@ -63,6 +64,7 @@ export function DayColumn({
   nextStopId?: string | null;
   nextTodoId?: string | null;
   profiles?: Profile[];
+  weatherByStopId?: Record<string, StopWeather>;
 }) {
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(day?.label ?? "");
@@ -185,6 +187,7 @@ export function DayColumn({
                 stop={entry.stop}
                 isNextUp={entry.id === nextStopId}
                 profiles={profiles}
+                weather={weatherByStopId?.[entry.id]}
               />
             ) : (
               <TodoRow

@@ -50,5 +50,11 @@ export function useTripData() {
       };
     },
     staleTime: 60_000,
+    // Every mount (e.g. switching from Agenda to Map) re-fetches from
+    // Supabase rather than trusting cached/persisted data. This is the same
+    // browser session right after the user's own edit, so it should never
+    // show stale results — unlike syncing a partner's changes from another
+    // device, which is fine to require a manual page refresh for.
+    refetchOnMount: "always",
   });
 }

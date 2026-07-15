@@ -20,6 +20,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { reorderDays } from "@/lib/actions/days";
 import { reorderStops } from "@/lib/actions/stops";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
+import { useWeather } from "@/hooks/useWeather";
 import { getNextUpcomingItem } from "@/lib/utils";
 import type { Day, Profile, Stop, Todo } from "@/lib/types";
 import { DayColumn } from "./DayColumn";
@@ -65,6 +66,8 @@ export function AgendaBoard({
   );
   const nextStopId = nextItem?.kind === "stop" ? nextItem.id : null;
   const nextTodoId = nextItem?.kind === "todo" ? nextItem.id : null;
+
+  const { data: weatherByStopId } = useWeather(stops, days);
 
   function stopsByDay(dayId: string | null) {
     return stops
@@ -188,6 +191,7 @@ export function AgendaBoard({
               nextStopId={nextStopId}
               nextTodoId={nextTodoId}
               profiles={profiles}
+              weatherByStopId={weatherByStopId}
             />
           ))}
         </div>
@@ -199,6 +203,7 @@ export function AgendaBoard({
           stops={stopsByDay(null)}
           nextStopId={nextStopId}
           profiles={profiles}
+          weatherByStopId={weatherByStopId}
         />
       </div>
 

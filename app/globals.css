@@ -56,3 +56,36 @@ body {
     animation: none !important;
   }
 }
+
+/*
+ * Horizontal scroll strips (e.g. the weather hourly list): no visible
+ * scrollbar by default, since touch swipe is the native gesture there.
+ * Devices with an actual mouse have no equivalent gesture affordance, so
+ * they get a slim styled scrollbar back instead of a bare, unscrollable-
+ * looking strip.
+ */
+.scroll-x-subtle {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-x-subtle::-webkit-scrollbar {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scroll-x-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.6) transparent;
+  }
+  .scroll-x-subtle::-webkit-scrollbar {
+    display: block;
+    height: 6px;
+  }
+  .scroll-x-subtle::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-x-subtle::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.6);
+    border-radius: 9999px;
+  }
+}

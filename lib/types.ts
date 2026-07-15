@@ -57,3 +57,23 @@ export type Stop = {
   created_by: string | null;
   created_at: string;
 };
+
+export type WeatherPoint = {
+  weatherCode: number;
+  temperatureC: number;
+  precipChance: number | null;
+  source: "hourly" | "daily";
+};
+
+export type HourlyForecastPoint = {
+  time: string; // "HH:MM", local to the stop's day
+  weatherCode: number;
+  temperatureC: number;
+  precipChance: number | null;
+};
+
+export type StopWeather = {
+  date: string; // the stop's day_date, "YYYY-MM-DD"
+  current: WeatherPoint;
+  hourly: HourlyForecastPoint[];
+};
