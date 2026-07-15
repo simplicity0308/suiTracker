@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SuiTracker
 
-## Getting Started
+A private, 2-person web app for planning a Japan trip in September 2026 — pin places on Google Maps, organize them into a day-by-day agenda with weather forecasts, and keep a shared to-do list. Built for exactly two users; public signup is disabled.
 
-First, run the development server:
+Live at [trip.benjamin0308.my](https://trip.benjamin0308.my).
+
+## Stack
+
+- **Next.js (App Router)** on Vercel, Turbopack
+- **Supabase** (Postgres + Auth) — no custom backend server
+- **Google Maps JavaScript API + Places API** for search-and-pin (no Directions/Routes API)
+- **Open-Meteo** for per-stop weather forecasts (free, no API key)
+- TanStack Query with a `localStorage` persister for offline itinerary viewing
+- Serwist service worker for PWA installability
+
+See [`PROJECT.md`](./PROJECT.md) for full project history, architecture decisions, and cross-session context — that's the source of truth, not this file.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Requires a `.env.local` with Supabase and Google Maps credentials — see `PROJECT.md` → "Environment variables."
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Auto-deploys to Vercel on push to `main`.

@@ -6,6 +6,18 @@ Living context doc for this project. Update as decisions change or phases comple
 
 A private, 2-person web app for planning a Japan trip in **September 2026**: pin places on Google Maps, organize them into a day-by-day schedule, add notes. Built by the user + Claude Code, for the user and their partner only.
 
+## Session handoff (read this first)
+
+**Git/deploy state:** everything committed and pushed. `main` is at `8445996` ("Add per-stop weather forecasts and fix cross-page data staleness"), live at `https://trip.benjamin0308.my` (Vercel auto-deploys on push). Working tree clean except a `README.md` refresh (was still the untouched `create-next-app` boilerplate — replaced with a real project summary that points to this file for full context) staged to go in the same commit.
+
+**This session's work:** built per-stop weather forecasts end-to-end (`hooks/useWeather.ts`, `WeatherPopover.tsx`) via Open-Meteo, then iterated through several real bugs the user caught by actually testing on their phone/PC: a stale-cache shape crash after restructuring the weather data (fixed with a `buster` on the persister), a flexbox layout bug that broke the popover's hourly strip out of its modal bounds (`min-w-0`), a scrollbar that was ugly on desktop and had no visible affordance on mobile (now a hidden-by-default strip with a slim styled scrollbar for mouse/trackpad only), and a timezone bug where "hide past hours" compared against the viewer's local clock instead of Tokyo's. Also fixed an unrelated but real bug: deleting a day on Agenda didn't reliably show up on the Map page until a hard refresh (`refetchOnMount: "always"` on `useTripData`). Full detail in the Architecture section below.
+
+**Local dev server:** was running in the background this session; will need restarting (`npm run dev`) next session.
+
+**Data state:** the user asked for and received ad-hoc SQL (not saved as a file/migration, since it's a data reset, not a schema change) to wipe `stops`/`days`/`todos` for a clean testing slate — `delete from stops/todos/days where trip_id = (select id from trips limit 1);`, plus an optional `trips.start_date`/`end_date` reset. Regenerate if asked again; not assumed to have been run.
+
+**Still-open Phase 5 hardening (carried over from previous sessions, not yet done):** Google Maps API key has no HTTP-referrer allowlist yet (should add `https://trip.benjamin0308.my/*` and `https://*.vercel.app/*`), no RLS sanity check with a second/throwaway account, and the real on-device installed-PWA + airplane-mode offline test has never actually been completed — worth doing before the September trip.
+
 ## Confirmed requirements
 
 - **Users:** Exactly 2 people (user + partner). No public signup, ever.
