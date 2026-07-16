@@ -14,8 +14,9 @@ jobs:
     steps:
       - name: Ping Supabase REST endpoint
         run: |
-          curl -sf -o /dev/null "${SUPABASE_URL}/rest/v1/" \
-            -H "apikey: ${SUPABASE_ANON_KEY}"
+          curl -sf -o /dev/null "${SUPABASE_URL}/rest/v1/trips?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}"
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
