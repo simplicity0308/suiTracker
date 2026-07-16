@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CATEGORIES, CATEGORY_COLORS, weatherIcon } from "@/lib/constants";
-import { formatTimeRange, getCreatorLabel, googleMapsUrl } from "@/lib/utils";
+import { formatTimeRange, getCreatorLabel } from "@/lib/utils";
 import type { Profile, Stop, StopWeather } from "@/lib/types";
 import { DeleteStopButton } from "./DeleteStopButton";
+import { MapsOptionsPopover } from "./MapsOptionsPopover";
 import { WeatherPopover } from "./WeatherPopover";
 
 export function StopCard({
@@ -14,13 +15,16 @@ export function StopCard({
   isNextUp = false,
   profiles = [],
   weather,
+  previousStop,
 }: {
   stop: Stop;
   isNextUp?: boolean;
   profiles?: Profile[];
   weather?: StopWeather;
+  previousStop?: Stop | null;
 }) {
   const [showWeather, setShowWeather] = useState(false);
+  const [showMapsOptions, setShowMapsOptions] = useState(false);
   const categoryLabel =
     CATEGORIES.find((c) => c.value === stop.category)?.label ?? stop.category;
   const timeRange = formatTimeRange(stop);
@@ -106,14 +110,13 @@ export function StopCard({
         {stop.note && (
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">{stop.note}</p>
         )}
-        <a
-          href={googleMapsUrl(stop)}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => setShowMapsOptions(true)}
           className="mt-1 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
         >
           Open in Maps
-        </a>
+        </button>
       </div>
       <DeleteStopButton id={stop.id} name={stop.name} />
       {showWeather && weather && (
@@ -122,6 +125,14 @@ export function StopCard({
           weather={weather}
           startTime={stop.start_time}
           onClose={() => setShowWeather(false)}
+        />
+      )}
+      {showMapsOptions && (
+        <MapsOptionsPopover
+          stopName={stop.name}
+          destination={stop}
+          previousStop={previousStop ?? null}
+          onClose={() => setShowMapsOptions(false)}
         />
       )}
     </div>

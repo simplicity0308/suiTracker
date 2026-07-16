@@ -17,6 +17,19 @@ export function googleMapsUrl(stop: Pick<Stop, "lat" | "lng" | "place_id">) {
   return `https://www.google.com/maps/search/?${params.toString()}`;
 }
 
+export function googleMapsDirectionsUrl(
+  destination: Pick<Stop, "lat" | "lng" | "place_id">,
+  origin?: Pick<Stop, "lat" | "lng">
+) {
+  const params = new URLSearchParams({
+    api: "1",
+    destination: `${destination.lat},${destination.lng}`,
+  });
+  if (destination.place_id) params.set("destination_place_id", destination.place_id);
+  if (origin) params.set("origin", `${origin.lat},${origin.lng}`);
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
 function formatClock(hours: number, minutes: number) {
   return new Date(2000, 0, 1, hours, minutes).toLocaleTimeString([], {
     hour: "numeric",

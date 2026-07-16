@@ -112,6 +112,17 @@ export function DayColumn({
 
   const entries = buildEntries(stops, todos);
 
+  const previousStopByStopId = new Map<string, Stop>();
+  {
+    let lastStop: Stop | null = null;
+    for (const entry of entries) {
+      if (entry.kind === "stop") {
+        if (lastStop) previousStopByStopId.set(entry.id, lastStop);
+        lastStop = entry.stop;
+      }
+    }
+  }
+
   return (
     <div ref={day ? setSortableRef : undefined} style={style} className="space-y-2">
       <div className="flex items-center gap-2">
@@ -188,6 +199,7 @@ export function DayColumn({
                 isNextUp={entry.id === nextStopId}
                 profiles={profiles}
                 weather={weatherByStopId?.[entry.id]}
+                previousStop={previousStopByStopId.get(entry.id) ?? null}
               />
             ) : (
               <TodoRow
