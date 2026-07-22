@@ -7,6 +7,7 @@ import { CATEGORIES, DURATION_OPTIONS } from "@/lib/constants";
 import { PlaceAutocomplete, type PlaceResult } from "@/components/map/PlaceAutocomplete";
 import { TimePicker } from "./TimePicker";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
+import { formatDayDateWithWeekday } from "@/lib/utils";
 import type { Category, Day } from "@/lib/types";
 
 export function StopForm({
@@ -113,6 +114,7 @@ export function StopForm({
           {days.map((d) => (
             <option key={d.id} value={d.id}>
               {d.label}
+              {d.day_date ? ` — ${formatDayDateWithWeekday(d.day_date)}` : ""}
             </option>
           ))}
         </select>

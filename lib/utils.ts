@@ -72,6 +72,16 @@ export function formatDayDate(dateStr: string | null) {
   });
 }
 
+export function formatDayDateWithWeekday(dateStr: string | null) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export type UpcomingItem =
   | { kind: "stop"; id: string }
   | { kind: "todo"; id: string };

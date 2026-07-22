@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createTodo, deleteTodo, toggleTodo } from "@/lib/actions/todos";
 import { TRIP_DATA_KEY } from "@/hooks/useTripData";
-import { getNextUpcomingItem } from "@/lib/utils";
+import { getNextUpcomingItem, formatDayDateWithWeekday } from "@/lib/utils";
 import type { Day, Profile, Stop, Todo } from "@/lib/types";
 import { TimePicker } from "./TimePicker";
 import { TodoRow } from "./TodoRow";
@@ -161,6 +161,7 @@ export function TodoList({
             {days.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.label}
+                {d.day_date ? ` — ${formatDayDateWithWeekday(d.day_date)}` : ""}
               </option>
             ))}
           </select>
